@@ -24,6 +24,7 @@ ASSIGN
 -- encode_variables
 -- build_model 
 
+--print_reachable_states -v
 -- pick_state -i to pick initial pick_state
 -- simulate_model -i -k 10 
 

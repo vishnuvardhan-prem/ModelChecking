@@ -19,3 +19,6 @@ VAR
     bit1:counter_cell(bit0.carry_out);
     bit2:counter_cell(bit1.carry_out);
     
+
+--An example of synchronous composition 
+--All assignments to all modules occur simultaneously.
