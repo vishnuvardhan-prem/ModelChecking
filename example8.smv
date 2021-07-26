@@ -1,0 +1,19 @@
+MODULE main
+
+VAR
+    x:boolean;
+    y:boolean;
+    q1:nand2(x,q2.out);
+    q2:nand2(y,q1.out);
+
+DEFINE
+    fout:=q1.out xor q2.out;
+
+MODULE nand2(in1,in2)
+
+VAR 
+    out:boolean;
+
+ASSIGN
+    init(out):=TRUE;
+    next(out):=!(in1 & in2);
