@@ -17,3 +17,18 @@ ASSIGN
                 (location=l2)&(x<100):x+1;
                 TRUE:x;
                 esac;
+
+
+--read_model -i 
+-- flatten_hierarchy
+-- encode_variables
+-- build_model 
+
+-- pick_state -i to pick initial pick_state
+-- simulate_model -i -k 10 
+
+-- check_ltlspect -p "G(request=false)"
+-- G must be satisfied across all executions
+
+-- check_ltlspec -p "F(x>=5)"
+-- F needs only one satisfied
