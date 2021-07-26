@@ -1,0 +1,17 @@
+--Another way of writing Example 5
+
+MODULE main
+
+VAR 
+    in1:boolean;
+    in2:boolean;
+    q:nand2(in1,in2);
+
+MODULE nand2(in1,in2)
+
+VAR
+    out:boolean;
+
+ASSIGN
+    init(out):=TRUE;
+    next(out):=!(in1 & in2);

@@ -1,0 +1,13 @@
+--Modelling HW circuit example 2
+
+MODULE main
+
+VAR
+    in1:boolean;
+    in2:boolean;
+
+--When a variable's value depends on the current values in the state,we use the keyword define
+DEFINE 
+    --zero delay
+    y:=!(in1 & in2);
+
