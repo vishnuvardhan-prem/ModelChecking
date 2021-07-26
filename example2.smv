@@ -11,3 +11,5 @@ ASSIGN
                     TRUE:{ready,busy};
                     esac;
     
+-- You can combine requirement checking
+-- check_ltlspec -p "G(request=1 ->F(status=busy))"
