@@ -1,0 +1,24 @@
+--Example of a concurrent system(traffic light)
+
+MODULE light(other)
+
+VAR
+    state:{r,y,g};
+
+ASSIGN
+    init(state):=r;
+    next(state):=case
+                    state=r & other=r:{r,y};
+                    state=y:g;
+                    state=g:{g,r};
+                    TRUE:state;
+                 esac;
+            
+MODULE main
+
+VAR
+    tl1:light(tl2.state);
+    tl2:light(tl1.state);
+
+
+--this is an example for synchronous composition and is a bad idea for traffic lights. Trace to understand.
