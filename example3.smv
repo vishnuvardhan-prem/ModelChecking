@@ -1,0 +1,15 @@
+--Modelling HW circuit example
+
+MODULE main
+
+VAR
+    x:boolean;
+    r:boolean;
+
+--When a variable's value depends on the current values in the state,we use the keyword define
+DEFINE 
+    y:=!(x xor r);
+
+ASSIGN
+    init(r):=FALSE;
+    next(r):=x xor r;
