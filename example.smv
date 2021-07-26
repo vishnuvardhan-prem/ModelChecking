@@ -26,7 +26,7 @@ ASSIGN
 
 --print_reachable_states -v
 -- pick_state -i to pick initial pick_state
--- simulate_model -i -k 10 
+-- simulate -i -k 10 
 
 -- check_ltlspect -p "G(request=false)"
 -- G must be satisfied across all executions

@@ -1,0 +1,31 @@
+-- Mutual Exclusion example
+
+MODULE thread(y)
+
+VAR 
+    location:{nc,w,exit,c};
+
+ASSIGN
+    init(location):=nc;
+    next(location):=case
+                    location=nc:{nc,w};
+                    location=w & y>0: c;
+                    location=c:{c,exit};
+                    location=exit:nc;
+                    TRUE:location;
+                    esac;
+    next(y):=case
+            location=w & y>0:y - 1;
+            location=exit & y=0: y + 1;
+            TRUE:y;
+            esac;
+
+MODULE main
+
+VAR 
+    y-main:0..1;
+    prg1:process thread(y-main);
+    prg2:process thread(y-main);
+
+ASSIGN
+    init(y-main):=1;
