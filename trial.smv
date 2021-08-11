@@ -1,0 +1,72 @@
+-- Excercise 2.5
+MODULE program1(y0,y1,s,p)
+
+VAR
+    location:{nc,w,c,exit};
+
+ASSIGN
+    init(location):=nc;
+    next(location):=case
+                    (location=nc):w;
+                    ((location=w) & (y1=0 | s!=p)): c;
+                    (location=c):nc;
+                    TRUE:location;
+                    esac;
+    
+    next(y0):=case
+             (location=nc):1;
+             (location=c):0;
+             TRUE:y0;
+             esac;
+    next(y1):=case
+            TRUE:y1;
+            esac;
+    next(s):=case
+            (location=nc):p;
+            TRUE:s;
+            esac;
+
+-- MODULE program2(y0,y1,s)
+
+-- VAR
+--     location:{nc,w,c,exit};
+
+-- ASSIGN
+--     init(location):=nc;
+--     next(location):=case
+--                     (location=nc):w;
+--                     (location=w) & (y1=0 | s!=0) : c;
+--                     (location=c):nc;
+--                     TRUE:location;
+--                     esac;
+    
+--     next(y0):=case
+--              (location=nc):1;
+--              (location=c):0;
+--              TRUE:y0;
+--              esac;
+--     next(y1):=case
+--             TRUE:y1;
+--             esac;
+--     next(s):=case
+--             (location=nc):0;
+--             TRUE:s;
+--             esac;
+
+MODULE main
+
+VAR
+    y0:0..1;
+    y1:0..1;
+    s:0..1;
+    thread1:process program1(y0,y1,s,0);
+    thread2:process program1(y1,y0,s,1);
+
+ASSIGN
+    init(y0):=0;
+    init(y1):=0;
+    init(s):=1;
+
+
+-- check_ltlspec -p "G(thread1.location=w -> F thread1.location=c)"
+-- check_ltlspec -p "G((thread1.location=w -> F thread1.location=c) & (thread2.location=w -> F thread2.location=c ))"
