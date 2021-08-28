@@ -1,0 +1,43 @@
+-- Exercise 2.10
+MODULE program1(k,b,p)
+
+VAR
+    location:{nc,w,c};
+
+ASSIGN
+    init(location):=nc;
+    next(location):=case
+                    location=nc:w;
+                    location=w & k=0:c;
+                    location=c:nc;
+                    TRUE:location;  
+                    esac;
+    
+    next(b[p]):=case
+                (location=nc):0;
+                (location=c):1;
+                TRUE:b[p];
+               esac;
+    
+    next(k):=case 
+            (location=w)&(k=1 & b[1-p]=1):0;
+            TRUE:k;
+            esac;
+    
+
+FAIRNESS running
+
+MODULE main
+
+VAR
+    k:0..1;
+    b:array 0..1 of {0,1};
+    thread1:process program1(k,b,0);
+    thread2:process program1(k,b,1);
+
+ASSIGN
+    init(b[0]):=1;
+    init(b[1]):=1;
+    init(k):=1;
+
+
