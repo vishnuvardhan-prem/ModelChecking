@@ -1,0 +1,53 @@
+MODULE philosopher(i,left,right)
+
+VAR
+	location: {think, request_right, request_left, have_right, have_left, eat, return};
+
+ASSIGN
+	init(location) := think;
+	next(location) := 
+		case
+			location=think : {request_left,request_right};
+			(location=request_left & left=free): have_left;
+			(location=have_left & right=free): eat;
+			(location=request_right & right = free): have_right;
+			(location=have_right & left=free): eat;
+			location=eat:return;
+			location=return: {think};
+			TRUE: location;
+		esac;
+	next(left) := 
+		case
+			location=request_left & left=free : i;
+			location=have_right & left=free: i;
+			location=return : free;
+			TRUE : left; 
+		esac;
+	next(right) := 
+		case
+			location=request_right & right=free: i;
+			location=have_left & right=free: i;
+			location=return: free;
+			TRUE: right;
+		esac;
+FAIRNESS running;
+
+MODULE main
+
+VAR
+	sticks: array 0..4 of {free,0,1,2,3,4};
+	phil0: process philosopher(0,sticks[0],sticks[4]);
+	phil1: process philosopher(1,sticks[1],sticks[0]);
+	phil2: process philosopher(2,sticks[2],sticks[1]);
+	phil3: process philosopher(3,sticks[3],sticks[2]);
+	phil4: process philosopher(4,sticks[4],sticks[3]);
+ASSIGN
+	init(sticks[0]) := free;
+	init(sticks[1]) := free;
+	init(sticks[2]) := free;
+	init(sticks[3]) := free;
+	init(sticks[4]) := free;
+
+	
+-- check_ltlspec -p "G(thread1.location=w -> F thread1.location=c)"
+-- check_ltlspec -p "G((thread1.location=w -> F thread1.location=c) & (thread2.location=w -> F thread2.location=c ))"
