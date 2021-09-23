@@ -8,7 +8,7 @@ ASSIGN
     init(location):=nc;
     next(location):=case
                     location=nc:w;
-                    location=w & k=0:c;
+                    location=w & k=p:c;
                     location=c:nc;
                     TRUE:location;  
                     esac;
@@ -20,7 +20,7 @@ ASSIGN
                esac;
     
     next(k):=case 
-            (location=w)&(k=1 & b[1-p]=1):0;
+            (location=w)&(k=1-p & b[1-p]=1):1-p;
             TRUE:k;
             esac;
     
