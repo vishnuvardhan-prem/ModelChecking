@@ -1,0 +1,29 @@
+-- Exercise 2.11
+
+MODULE main
+
+VAR
+    x:boolean;
+    r1:nand2(x,r1.out);
+    r2:nand3(x,r2.out,r1.out);
+
+DEFINE
+    fout:=r1.out & r2.out;
+
+MODULE nand2(in1,in2)
+
+VAR 
+    out:boolean;
+
+ASSIGN
+    init(out):=TRUE;
+    next(out):=(in1 & !in2) | (!in1 & in2);
+
+MODULE nand3(in1,in2,in3)
+
+VAR 
+    out:boolean;
+
+ASSIGN
+    init(out):=TRUE;
+    next(out):=(!(in1) & in2) | (in1 & in3);
