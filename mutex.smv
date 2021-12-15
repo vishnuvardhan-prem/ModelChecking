@@ -1,0 +1,40 @@
+-- Excercise 2.9
+MODULE program1(x1,x2)
+
+VAR
+    location:{nc,w,c,exit};
+
+ASSIGN
+    init(location):=nc;
+    next(location):=case
+                    ((x1>=50)|(x2>=50)):exit;
+                    (location=nc)&(x1<50):w;
+                    (location=w) & ((x2=0)|(x1<x2)) : c;
+                    (location=c):nc;
+                    TRUE:location;
+                    esac;
+    
+    next(x1):=case
+             (location=nc)&(x2<50):x2 + 1;
+             (location=c):0;
+             TRUE:x1;
+             esac;
+    next(x2):=case
+            TRUE:x2;
+            esac;
+    -- next(k):=case
+    --         (location=c):1;
+    --         TRUE:0;
+    --         esac
+
+MODULE main
+
+VAR
+    x1:0..50;
+    x2:0..50;
+    thread1:process program1(x1,x2);
+    thread2:process program1(x2,x1);
+
+ASSIGN
+    init(x1):=0;
+    init(x2):=0;

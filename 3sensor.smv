@@ -1,0 +1,20 @@
+MODULE world(a)
+
+VAR
+    location:{reading};
+
+ASSIGN
+    init(location):=reading;
+
+MODULE sensor(a,h,b)
+
+VAR
+    k:0..4;
+
+ASSIGN
+    next(b):=b+k
+
+
+
+
+

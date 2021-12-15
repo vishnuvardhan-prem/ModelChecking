@@ -1,0 +1,90 @@
+-- MODULE philosopher()
+
+-- VAR
+--     location:{think,leftw,rightw,eat,rell,relr};
+--     haveleft:0..1;
+--     haveright:0..1;
+
+-- ASSIGN  
+--     init(location):=think;
+--     next(location):=case 
+--                     location=think:think
+--                     location=think &
+--                     esac
+
+--     next(haveleft):=
+
+--     next(haveright):=
+
+
+-- MODULE stick(s)
+
+-- VAR
+--     location:{availablel,availabler,occupied};
+
+-- ASSIGN
+--     init(location):availablel;
+--     next(location):case
+
+--                    esac
+
+--     next(s):1-s;
+
+
+-- MODULE main
+
+-- VAR
+--     stick:
+
+
+
+
+MODULE philosopher(i,left,right)
+
+VAR
+	location: {think, request_right, request_left, have_right, have_left, eat, return};
+
+ASSIGN
+	init(location) := think;
+	next(location) := 
+		case
+			location=think : {request_left,request_right};
+			(location=request_left & left=freel): have_left;
+			(location=have_left & right=freer): eat;
+			(location=request_right & right = freer): have_right;
+			(location=have_right & left=freel): eat;
+			location=eat:return;
+			location=return: {think};
+			TRUE: location;
+		esac;
+	next(left) := 
+		case
+			location=request_left & left=freel : i;
+			location=have_right & left=freel: i;
+			location=return : freer;
+			TRUE : left; 
+		esac;
+	next(right) := 
+		case
+			location=request_right & right=freer: i;
+			location=have_left & right=freer: i;
+			location=return: freel;
+			TRUE: right;
+		esac;
+FAIRNESS running;
+
+MODULE main
+
+VAR
+	sticks: array 0..4 of {freel,freer,0,1,2,3,4};
+	phil0: process philosopher(0,sticks[0],sticks[4]);
+	phil1: process philosopher(1,sticks[1],sticks[0]);
+	phil2: process philosopher(2,sticks[2],sticks[1]);
+	phil3: process philosopher(3,sticks[3],sticks[2]);
+	phil4: process philosopher(4,sticks[4],sticks[3]);
+ASSIGN
+	init(sticks[0]) := freel;
+	init(sticks[1]) := freer;
+	init(sticks[2]) := freel;
+	init(sticks[3]) := freel;
+	init(sticks[4]) := freer;
