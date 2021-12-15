@@ -2,17 +2,118 @@ MODULE world(a)
 
 VAR
     location:{reading};
+    worldval:0..5;
 
 ASSIGN
     init(location):=reading;
+    init(worldval):=0;
+
+    next(worldval)=a;
+
 
 MODULE sensor(a,h,b)
 
 VAR
-    k:0..4;
+    k:-1..1;
+
 
 ASSIGN
-    next(b):=b+k
+    next(b):=a+k
+
+MODULE voter(b1,b2,b3,h1,h2,h3)
+
+VAR
+    d:array 0..2 of 0..4;
+    p:array 0..2 of 0..4;
+    c:array 0..2 of 0..3;
+    error:array 0..2 of boolean;
+    valid:array 0.2 of boolean;
+    numvalid:0..3;
+
+ASSIGN
+    init(d[0])=0;
+    init(d[1])=0;
+    init(d[2])=0;
+    
+    init(error[0]):=FALSE;
+    init(error[1]):=FALSE;
+    init(error[2]):=FALSE;
+    
+    init(valid[0]):=TRUE;
+    init(valid[1]):=TRUE;
+    init(valid[2]):=TRUE;
+
+    init(p[0])=0;
+    init(p[1])=0;
+    init(p[2])=0;
+    init(c[0])=0;
+    init(c[1])=0;
+    init(c[2])=0;
+
+    next(d[0])=abs(b1-b2);
+    next(d[1])=abs(b2-b3);
+    next(d[2])=abs(b3-b1);
+
+    next(p[0])=case
+                (d[0]>2)&(p[0]<4)&(numvalid=3):p[0]+1;
+                (d[0]<=2)&(p[0]>1)&(numvalid=3):p[0]-1;
+                TRUE:p[0];
+                esac;
+
+    next(p[1])=case
+                (d[1]>2)&(p[1]<4)&(numvalid=3):p[1]+1;
+                (d[1]<=2)&(p[1]>1)&(numvalid=3):p[1]-1;
+                TRUE:p[1];
+                esac;
+
+    next(p[2])=case
+                (d[2]>2)&(p[2]<4)&(numvalid=3):p[2]+1;
+                (d[2]<=2)&(p[2]>1)&(numvalid=3):p[2]-1;
+                TRUE:p[2];
+                esac;
+
+    next(c[0])=case
+                (h1=0)&(valid[0]=TRUE)&(c[0<3]):c[0]+1;
+                (h1=1)&(valid[0]=TRUE)&(c[0]!=0)&(c[0]!=3):0;
+                TRUE:c[0];
+                esac;
+
+    next(c[1])=case
+                (h2=0)&(valid[1]=TRUE)&(c[1]<3]):c[1]+1;
+                (h2=1)&(valid[1]=TRUE)&(c[1]!=0)&(c[1]!=3):0;
+                TRUE:c[1];
+                esac;
+    
+    next(c[2])=case
+                (h3=0)&(valid[2]=TRUE)&(c[2]<3]):c[2]+1;
+                (h3=1)&(valid[2]=TRUE)&(c[2]!=0)&(c[2]!=3):0;
+                TRUE:c[2];
+                esac;
+                
+    next(error[0]):=case
+                    (p[0]=4)|(c[0]=3):TRUE;
+                    TRUE:error[0];
+                    esac;
+    next(error[1]):=case
+                    (p[1]=4)|(c[1]=3):TRUE;
+                    TRUE:error[1];
+                    esac;
+    next(error[2]):=case
+                    (p[2]=4)|(c[2]=3):TRUE;
+                    TRUE:error[2];
+                    esac;
+
+    next(numvalid):case
+                    (error[0]=1)&(error[1]=1)&(error[2]=1):3;
+                    (error[0]=0)&(error[1]=1)&(error[2]=1):2;
+                    (error[0]=1)&(error[1]=0)&(error[2]=1):2;
+                    (error[0]=1)&(error[1]=1)&(error[2]=0):2;
+                    (error[0]=1)&(error[1]=0)&(error[2]=0):1;
+                    (error[0]=0)&(error[1]=1)&(error[2]=0):1;
+                    (error[0]=0)&(error[1]=0)&(error[2]=1):1;
+                    (error[0]=0)&(error[1]=0)&(error[2]=0):0;
+                    TRUE:numvalid;
+                   esac
 
 
 
