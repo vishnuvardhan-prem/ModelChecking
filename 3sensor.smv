@@ -1,4 +1,4 @@
-MODULE world(a)
+MODULE world(a) --This module is responsible for just passing data values
 
 VAR
     location:{reading};
@@ -11,11 +11,10 @@ ASSIGN
     next(worldval)=a;
 
 
-MODULE sensor(a,h,b)
+MODULE sensor(a,h,b) --The sensor module can add faults to the readings from the world module as well as pass the hardware flags of the sensor
 
 VAR
     k:-1..1;
-
 
 ASSIGN
     next(b):=a+k
@@ -23,17 +22,16 @@ ASSIGN
 MODULE voter(b1,b2,b3,h1,h2,h3)
 
 VAR
-    d:array 0..2 of 0..4;
-    p:array 0..2 of 0..4;
-    c:array 0..2 of 0..3;
-    error:array 0..2 of boolean;
-    valid:array 0.2 of boolean;
-    numvalid:0..3;
+    diff:array 0..2 of 0..4; --This is an array of the absolute differences of the readings of different pairs of the sensors
+    pcount:array 0..2 of 0..4;  --A persistence counter for variations in the absolute differences
+    hcount:array 0..2 of 0..3;  --A count of the number of cycles for which is a sensor is continously identified with a hardware fault
+    error:array 0..2 of boolean; --To keep track of the sensor faults
+    numvalid:0..3; --The number of valid sensors available.
 
 ASSIGN
-    init(d[0])=0;
-    init(d[1])=0;
-    init(d[2])=0;
+    init(diff[0])=0;
+    init(diff[1])=0;
+    init(diff[2])=0;
     
     init(error[0]):=FALSE;
     init(error[1]):=FALSE;
@@ -43,63 +41,63 @@ ASSIGN
     init(valid[1]):=TRUE;
     init(valid[2]):=TRUE;
 
-    init(p[0])=0;
-    init(p[1])=0;
-    init(p[2])=0;
-    init(c[0])=0;
-    init(c[1])=0;
-    init(c[2])=0;
+    init(pcount[0])=0;
+    init(pcount[1])=0;
+    init(pcount[2])=0;
+    init(hcount[0])=0;
+    init(hcount[1])=0;
+    init(hcount[2])=0;
 
-    next(d[0])=abs(b1-b2);
-    next(d[1])=abs(b2-b3);
-    next(d[2])=abs(b3-b1);
+    next(diff[0])=abs(b1-b2);
+    next(diff[1])=abs(b2-b3);
+    next(diff[2])=abs(b3-b1);
 
     next(p[0])=case
-                (d[0]>2)&(p[0]<4)&(numvalid=3):p[0]+1;
-                (d[0]<=2)&(p[0]>1)&(numvalid=3):p[0]-1;
+                (diff[0]>2)&(pcount[0]<4)&(numvalid=3):p[0]+1;
+                (diff[0]<=2)&(pcount[0]>1)&(numvalid=3):p[0]-1;
                 TRUE:p[0];
                 esac;
 
     next(p[1])=case
-                (d[1]>2)&(p[1]<4)&(numvalid=3):p[1]+1;
-                (d[1]<=2)&(p[1]>1)&(numvalid=3):p[1]-1;
+                (diff[1]>2)&(pcount[1]<4)&(numvalid=3):p[1]+1;
+                (diff[1]<=2)&(pcount[1]>1)&(numvalid=3):p[1]-1;
                 TRUE:p[1];
                 esac;
 
     next(p[2])=case
-                (d[2]>2)&(p[2]<4)&(numvalid=3):p[2]+1;
-                (d[2]<=2)&(p[2]>1)&(numvalid=3):p[2]-1;
+                (diff[2]>2)&(pcount[2]<4)&(numvalid=3):p[2]+1;
+                (diff[2]<=2)&(pcount[2]>1)&(numvalid=3):p[2]-1;
                 TRUE:p[2];
                 esac;
 
     next(c[0])=case
-                (h1=0)&(valid[0]=TRUE)&(c[0<3]):c[0]+1;
-                (h1=1)&(valid[0]=TRUE)&(c[0]!=0)&(c[0]!=3):0;
-                TRUE:c[0];
+                (h1=0)&(hcount[0<3]):hcount[0]+1;
+                (h1=1)&(hcount[0]!=0)&(hcount[0]!=3):0;
+                TRUE:hcount[0];
                 esac;
 
     next(c[1])=case
-                (h2=0)&(valid[1]=TRUE)&(c[1]<3]):c[1]+1;
-                (h2=1)&(valid[1]=TRUE)&(c[1]!=0)&(c[1]!=3):0;
-                TRUE:c[1];
+                (h2=0)&(hcount[1]<3]):hcount[1]+1;
+                (h2=1)&(hcount[1]!=0)&(hcount[1]!=3):0;
+                TRUE:hcount[1];
                 esac;
     
     next(c[2])=case
-                (h3=0)&(valid[2]=TRUE)&(c[2]<3]):c[2]+1;
-                (h3=1)&(valid[2]=TRUE)&(c[2]!=0)&(c[2]!=3):0;
-                TRUE:c[2];
+                (h3=0)&(hcount[2]<3]):hcount[2]+1;
+                (h3=1)&(hcount[2]!=0)&(hcount[2]!=3):0;
+                TRUE:hcount[2];
                 esac;
                 
     next(error[0]):=case
-                    (p[0]=4)|(c[0]=3):TRUE;
+                    (pcount[0]=4)|(hcount[0]=3):TRUE;
                     TRUE:error[0];
                     esac;
     next(error[1]):=case
-                    (p[1]=4)|(c[1]=3):TRUE;
+                    (pcount[1]=4)|(hcount[1]=3):TRUE;
                     TRUE:error[1];
                     esac;
     next(error[2]):=case
-                    (p[2]=4)|(c[2]=3):TRUE;
+                    (pcount[2]=4)|(hcount[2]=3):TRUE;
                     TRUE:error[2];
                     esac;
 
