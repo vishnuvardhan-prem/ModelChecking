@@ -16,6 +16,7 @@ VAR
     valid: array 0..2 of boolean; --To keep track of failed sensors 
     numvalid:0..3; --The number of valid sensors available
     set:array 0..2 of boolean; --To allow for count of persisten miscompare when sensors reduce
+    outputvalid:boolean;
 
 ASSIGN
     init(diff[0]):=0;
@@ -48,7 +49,6 @@ ASSIGN
     next(p[0]):=case
                 (diff[0]>2)&(pcount[0]<4)&(numvalid=3):p[0]+1;
                 (diff[0]<=2)&(pcount[0]>1)&(numvalid=3):p[0]-1;
-                
                 TRUE:p[0];
                 esac;
 
@@ -67,23 +67,35 @@ ASSIGN
     next(c[0]):=case
                 (h1=0)&(hcount[0<3]):hcount[0]+1;
                 (h1=1)&(hcount[0]!=0)&(hcount[0]!=3):0;
-                TRUE:hcount[0];
+                TRUE:c[0];
                 esac;
 
     next(c[1]):=case
                 (h2=0)&(hcount[1]<3]):hcount[1]+1;
                 (h2=1)&(hcount[1]!=0)&(hcount[1]!=3):0;
-                TRUE:hcount[1];
+                TRUE:c[1];
                 esac;
     
     next(c[2]):=case
                 (h3=0)&(hcount[2]<3]):hcount[2]+1;
                 (h3=1)&(hcount[2]!=0)&(hcount[2]!=3):0;
-                TRUE:hcount[2];
+                TRUE:c[2];
                 esac;
     
     next(valid[0]):=case 
-                (numvalid==3)
+                (p[0]=4)&(p[2]=4)&(numvalid=3):FALSE;
+
+                TRUE:valid[0];
+                esac;
+    
+    next(valid[1]):=case 
+                (p[1]=4)&(p[0]=4)&(numvalid=3):FALSE;
+                TRUE:valid[1];
+                esac;
+    
+    next(valid[2]):=case 
+                (p[0]=4)&(p[1]=4)&(numvalid=3):FALSE;
+                TRUE:valid[2];
                 esac;
 
     numvalid:=case
