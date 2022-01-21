@@ -2,7 +2,7 @@ MODULE sensor(worldval,hwbit,sensorval) --The sensor module can add faults to th
 
 VAR
     noise:-1..1;
-
+    test;
 ASSIGN
     next(sensorval):=case
                     (worldval+noise)>-1:worldval+noise;
