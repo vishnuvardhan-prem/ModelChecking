@@ -1,0 +1,125 @@
+MODULE sensor(worldval,hwerrorflag,sensorval)
+
+DEFINE 
+    maxsensorval:=3;
+    minsensorval:=0;
+
+VAR 
+    noise:-1..1;
+
+ASSIGN 
+    sensorval:= case
+                (worldval+noise) < minsensorval : minsensorval ;
+                (worldval+noise) > maxsensorval : maxsensorval ;
+                TRUE: worldval+noise;
+                esac;
+
+MODULE sensorvoter(sv1,hw1,sv2,hw2,sv3,hw3)
+
+VAR 
+    diff:array 0..2 of 0..4;
+
+    pcount:array 0..2 of 0..4;
+
+    hcount:array 0..2 of 0..3;
+    
+    valid:array 0..2 of boolean;
+
+    numvalid:0..3;
+
+    outputvalid:boolean;
+
+    start:boolean;
+ASSIGN
+    init(valid[0]):=TRUE;
+    init(valid[1]):=TRUE;
+    init(valid[2]):=TRUE;
+    
+    init(start):=TRUE;
+    
+    next(start):=FALSE;
+    
+    pcount[0]:=case
+               (start=TRUE):0;            
+               (diff[0]>2)&(pcount[0]<4)&(numvalid=3):pcount[0]+1;
+               (diff[0]<=2)&(pcount[0]>1)&(numvalid=3):pcount[0]-1; --considering persistence,it should be 0..
+               TRUE:pcount[0];
+               esac;
+    pcount[1]:=case
+                (start=TRUE):0;   
+                (diff[1]>2)&(pcount[1]<4)&(numvalid=3):pcount[1]+1;
+                (diff[1]<=2)&(pcount[1]>1)&(numvalid=3):pcount[1]-1;
+                TRUE:pcount[1];
+                esac;
+    pcount[2]:=case
+                (start=TRUE):0;  
+                (diff[2]>2)&(pcount[2]<4)&(numvalid=3):pcount[2]+1;
+                (diff[2]<=2)&(pcount[2]>1)&(numvalid=3):pcount[2]-1;
+                TRUE:pcount[2];
+                esac;
+    
+    hcount[0]:=case
+                (start=TRUE):0;
+                (hw1=TRUE)&(hcount[0]<3):hcount[0]+1;
+                (hw1=FALSE)&(hcount[0]!=0)&(hcount[0]!=3):0;
+                TRUE:hcount[0];
+                esac;
+    hcount[1]:=case
+                (start=TRUE):0;
+                (hw2=TRUE)&(hcount[1]<3):hcount[1]+1;
+                (hw2=FALSE)&(hcount[1]!=0)&(hcount[1]!=3):0;
+                TRUE:hcount[1];
+                esac;
+    hcount[2]:=case
+                (start=TRUE):0;
+                (hw3=TRUE)&(hcount[2]<3):hcount[2]+1;
+                (hw3=FALSE)&(hcount[2]!=0)&(hcount[2]!=3):0;
+                TRUE:hcount[2];
+                esac;
+    
+    next(valid[0]):=case 
+                (pcount[0]=4)&(pcount[2]=4)&(numvalid=3):FALSE;
+                (hcount[0]=3):FALSE;
+                TRUE:valid[0];
+                esac;
+    
+    next(valid[1]):=case 
+                (pcount[1]=4)&(pcount[0]=4)&(numvalid=3):FALSE;
+                (hcount[1]=3):FALSE;
+                TRUE:valid[1];
+                esac;
+    
+    next(valid[2]):=case 
+                (pcount[0]=4)&(pcount[1]=4)&(numvalid=3):FALSE;
+                (hcount[2]=3):FALSE;
+                TRUE:valid[2];
+                esac;
+
+    next(numvalid):=case
+                    (valid[0]=FALSE)&(valid[1]=TRUE)&(valid[2]=TRUE):2;
+                    (valid[0]=TRUE)&(valid[1]=TRUE)&(valid[2]=TRUE):3;
+                    (valid[0]=TRUE)&(valid[1]=FALSE)&(valid[2]=TRUE):2;
+                    (valid[0]=TRUE)&(valid[1]=TRUE)&(valid[2]=FALSE):2;
+                    (valid[0]=TRUE)&(valid[1]=FALSE)&(valid[2]=FALSE):1;
+                    (valid[0]=FALSE)&(valid[1]=TRUE)&(valid[2]=FALSE):1;
+                    (valid[0]=FALSE)&(valid[1]=FALSE)&(valid[2]=TRUE):1;
+                    (valid[0]=FALSE)&(valid[1]=FALSE)&(valid[2]=FALSE):0;
+                    TRUE:numvalid;
+                   esac;
+
+MODULE main
+
+VAR
+    worldreading: 0..3; --Values from the world
+    
+    hwerrorflag:array 0..2 of boolean; --Used as the hardware error flag on each sensor, FALSE-No error TRUE-error
+ 
+    sensorval:array 0..2 of 0..3; --Output from the sensor after introducing noise 
+
+    sensormodule1:sensor(worldreading,hwerrorflag[0],sensorval[0]);
+
+    sensormodule2:sensor(worldreading,hwerrorflag[1],sensorval[1]);
+
+    sensormodule3:sensor(worldreading,hwerrorflag[2],sensorval[2]);
+
+    votermodule:sensorvoter(sensorval[0],hwerrorflag[0],sensorval[1],hwerrorflag[1],sensorval[2],hwerrorflag[2]);
