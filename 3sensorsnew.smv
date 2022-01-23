@@ -32,7 +32,7 @@ VAR
     -- num_sensor_valid:0..3; --The number of valid sensors available
     
     
-    outputvalid:boolean;
+    -- outputvalid:boolean;
 
 DEFINE 
     deviation_threshold:=2;
@@ -65,7 +65,7 @@ DEFINE
                     TRUE:TRUE;
                     esac;
 
-    op_value= case
+    op_value:= case
         (num_sensor_valid=3)&(outputvalid=FALSE):(sv0+sv1+sv2)/3;
         (num_sensor_valid=3)&(miscompare_01)&(miscompare_20):(sv0+2*sv1+2*sv2)/5;
         (num_sensor_valid=3)&(miscompare_01)&(miscompare_12):(2*sv0+sv1+2*sv2)/5;
@@ -92,7 +92,6 @@ INIT
     & hw_error_pcount[1]=0
     & hw_error_pcount[2]=0
 
-    &outputvalid=TRUE
 
 ASSIGN
     next(op_miscompare_pcount_01):=case
