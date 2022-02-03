@@ -167,4 +167,28 @@ VAR
 ASSIGN
     init(worldreading):=0;
 
+-- SPEC
+
+
+    -- Once a sensor fails, isolation is final.
+    -- AG(votermodule.num_sensor_valid=2 -> !(EF(votermodule.num_sensor_valid=3)))
+
+    -- Once 2 sensors fails, isolation is final.
+    -- AG(votermodule.num_sensor_valid=1 -> !(EF(votermodule.num_sensor_valid=2)))
+
+    -- No recovery from all failed sensors.
+    -- AG(votermodule.num_sensor_valid=0 -> !(EF(votermodule.num_sensor_valid=1)))
+
+
+    -- EF(A[(votermodule.num_sensor_valid=2 & votermodule.outputvalid=TRUE)U(votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE)]) & EF(A[(votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE)U(votermodule.num_sensor_valid=2 & votermodule.outputvalid=TRUE)]) check
+
+    -- 2 miscomparing sensors to 1 valid sensor 
+    -- EF(A[(votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE) U (votermodule.num_sensor_valid=1 & votermodule.outputvalid=TRUE)])
+
+    -- 3 valid sensors,first sensor failure, 2 sensors valid
+    -- AG((votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE)-> EF(votermodule.num_sensor_valid=2 & votermodule.outputvalid=TRUE))
+
+    
+
+    -- AG((votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE)-> EF(votermodule.num_sensor_valid=1 & votermodule.outputvalid= TRUE)) Need to check this...
 
