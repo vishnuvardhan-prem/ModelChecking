@@ -37,7 +37,7 @@ DEFINE
                     (sensor_valid[0]=FALSE)|(sensor_valid[2]=FALSE):FALSE;
                     TRUE:(abs((sv2)-(sv0)) > deviation_threshold);
                     esac;
-    
+     
     num_sensor_valid:=case
                     (sensor_valid[0]=TRUE)&(sensor_valid[1]=TRUE)&(sensor_valid[2]=TRUE):3;
                     (sensor_valid[0]=FALSE)&(sensor_valid[1]=TRUE)&(sensor_valid[2]=TRUE):2;
