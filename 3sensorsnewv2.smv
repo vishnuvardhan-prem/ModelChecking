@@ -1,16 +1,16 @@
 MODULE sensor(worldval) --The sensor module can add faults to the readings from the world module as well as pass the hardware flags of the sensor
 
 DEFINE 
-    maxsensorval:=8;
+    maxsensorval:=4;
     minsensorval:=0;
-    maxnoise:=4;
+
     sensorval:=case
                     (worldval+noise) < minsensorval:minsensorval;
                     (worldval+noise) > maxsensorval:maxsensorval;
                     TRUE: worldval+noise;
                     esac;
 VAR
-    noise:-(maxnoise)..(maxnoise);
+    noise:-10..10;
     hwerrorflag:boolean; --Used as the hardware error flag on each sensor, FALSE-No error TRUE-error
 
 ASSIGN
@@ -20,28 +20,14 @@ ASSIGN
 MODULE sensorvoter(sv0,hw0_error,sv1,hw1_error,sv2,hw2_error)
 
 DEFINE 
-    deviation_threshold:=4;
+    deviation_threshold:=3;
     deviation_persistence_threshold:=4;
     hw_persistence_threshold:=3;
 
-    mis01:=abs((sv0)-(sv1));
-    mis02:=abs((sv0)-(sv2));
-    mis12:=abs((sv2)-(sv1));
-
-    miscompare_01:=case
-                    (sensor_valid[0]=FALSE)|(sensor_valid[1]=FALSE):FALSE;
-                    TRUE:(abs((sv0)-(sv1)) >= deviation_threshold);
-                    esac;
-                    
-    miscompare_12:= case
-                    (sensor_valid[2]=FALSE)|(sensor_valid[1]=FALSE):FALSE;
-                    TRUE:(abs((sv1)-(sv2)) >= deviation_threshold);
-                    esac;
-    miscompare_20:= case
-                    (sensor_valid[0]=FALSE)|(sensor_valid[2]=FALSE):FALSE;
-                    TRUE:(abs((sv2)-(sv0)) >= deviation_threshold);
-                    esac;
-     
+    miscompare_01:= (abs((sv0)-(sv1)) > deviation_threshold);
+    miscompare_12:= (abs((sv1)-(sv2)) > deviation_threshold);
+    miscompare_20:= (abs((sv2)-(sv0)) > deviation_threshold);
+    
     num_sensor_valid:=case
                     (sensor_valid[0]=TRUE)&(sensor_valid[1]=TRUE)&(sensor_valid[2]=TRUE):3;
                     (sensor_valid[0]=FALSE)&(sensor_valid[1]=TRUE)&(sensor_valid[2]=TRUE):2;
@@ -65,6 +51,7 @@ DEFINE
                     esac;
 
     op_value:= case
+        (num_sensor_valid=3)&(outputvalid=FALSE):(sv0+sv1+sv2)/3;
         (num_sensor_valid=3)&(miscompare_01)&(miscompare_20):(sv0+2*sv1+2*sv2)/5;
         (num_sensor_valid=3)&(miscompare_01)&(miscompare_12):(2*sv0+sv1+2*sv2)/5;
         (num_sensor_valid=3)&(miscompare_20)&(miscompare_12):(2*sv0+2*sv1+sv2)/5;
@@ -138,8 +125,7 @@ ASSIGN
                 TRUE:hw_persistence_threshold;
                 esac;
 
-    next(sensor_valid[0]):=
-                case 
+    next(sensor_valid[0]):=case 
                 (op_miscompare_pcount_01=deviation_persistence_threshold)&(op_miscompare_pcount_20=deviation_persistence_threshold)&(op_miscompare_pcount_12 <deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
                 (hw_error_pcount[0]=hw_persistence_threshold):FALSE;
                 TRUE:sensor_valid[0];
@@ -158,25 +144,13 @@ ASSIGN
                 esac;
     
 INVAR
-    !((hw0_error & hw1_error)|(hw0_error & hw2_error)|(hw2_error & hw1_error)) 
-    &!((hw_error_pcount[0]=hw_persistence_threshold &hw_error_pcount[1]=hw_persistence_threshold)|(hw_error_pcount[0]=hw_persistence_threshold &hw_error_pcount[2]=hw_persistence_threshold)|(hw_error_pcount[1]=hw_persistence_threshold &hw_error_pcount[2]=hw_persistence_threshold))
-    -- &((hw_error_pcount[0]=hw_persistence_threshold)-> hw0_error)
-    -- &((hw_error_pcount[1]=hw_persistence_threshold)-> hw1_error)
-    -- &((hw_error_pcount[2]=hw_persistence_threshold)-> hw2_error)
+    !((hw0_error & hw1_error)|(hw0_error & hw2_error)|(hw2_error & hw1_error))
 
 
 MODULE main
 
-DEFINE
-    
-    error_threshold:=case
-        votermodule.num_sensor_valid=3:sensormodule1.maxnoise -2;
-        votermodule.num_sensor_valid=2:sensormodule1.maxnoise -1;
-        votermodule.num_sensor_valid=1:sensormodule1.maxnoise;
-    esac;
-
 VAR
-    worldreading: 0..8; --Values from the world
+    worldreading: -20..20; --Values from the world
     
     sensormodule1:sensor(worldreading);
 
@@ -185,6 +159,14 @@ VAR
     sensormodule3:sensor(worldreading);
 
     votermodule:sensorvoter(sensormodule1.sensorval,sensormodule1.hwerrorflag,sensormodule2.sensorval,sensormodule2.hwerrorflag,sensormodule3.sensorval,sensormodule3.hwerrorflag);
+
+DEFINE 
+    output_deviation:=abs(worldreading-votermodule.outputvalid);
+    output_deviation_threshold_first_transient:1;
+    output_deviation_threshold_second_transient:5;
+    transient_timer:case
+                        ()
+                    esac;
 
 ASSIGN
     init(worldreading):=0;
@@ -208,25 +190,39 @@ ASSIGN
     -- 2 miscomparing sensors to 1 valid sensor 
     -- EF(A[(votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE) U (votermodule.num_sensor_valid=1 & votermodule.outputvalid=TRUE)])
 
-    -- After one sensor fails, it is always possible to reach a case where 2 sensors are valid along with a valid output
-    -- AG((votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE)-> EF(votermodule.num_sensor_valid=2 & votermodule.outputvalid=TRUE)) This was the problem one.
+    -- 3 valid sensors,first sensor failure, 2 sensors valid
+    -- AG((votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE)-> EF(votermodule.num_sensor_valid=2 & votermodule.outputvalid=TRUE))
     
-    -- AG((votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE)-> EF(votermodule.num_sensor_valid=1 & votermodule.outputvalid= TRUE)) 
+
+    -- AG((votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE)-> EF(votermodule.num_sensor_valid=1 & votermodule.outputvalid= TRUE)) Need to check this...
 
 
     --1.AG((votermodule.num_sensor_valid=3 & votermodule.outputvalid=TRUE)&(votermodule.sensor_valid[0]=FALSE) -> AF (votermodule.num_sensor_valid=2 & votermodule.outputvalid=TRUE))
-    
-    --These two were false.
     --2.AG((votermodule.num_sensor_valid=2 & votermodule.outputvalid=TRUE)&(votermodule.sensor_valid[1]=FALSE)->AF ((votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE)|(votermodule.num_sensor_valid=1)))
-    --3.AG((votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE)&(votermodule.sensor_valid[0]=FALSE)->EF((votermodule.num_sensor_valid=2 & votermodule.outputvalid=TRUE)))
+    -- This was false
+    --3.AG((votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE)&(votermodule.sensor_valid[0]=FALSE)->EF(votermodule.num_sensor_valid=2 & votermodule.outputvalid=TRUE))
 
 
     --Computation of Output
 
     -- AG(!(votermodule.op_value=worldreading)->AF(A[!(votermodule.op_value=worldreading) U((votermodule.op_value=worldreading) & votermodule.outputvalid)] | !(votermodule.op_value=worldreading)))
 
-    --AG(votermodule.outputvalid -> abs((worldreading)-(votermodule.op_value)) <=error_threshold)
+    --AG(votermodule.outputvalid -> abs((worldreading)-(votermodule.op_value)) <2)
 
 
+    -- DEFINE
+--     s0:=(votermodule.num_sensor_valid=3);
+--     s1:=(votermodule.num_sensor_valid=2);
+--     s2:=(votermodule.num_sensor_valid=1);
+--     s3:=(votermodule.num_sensor_valid=0);
 
--- AG(((votermodule.num_sensor_valid=2) & (votermodule.sensor_valid[2]=FALSE) & (votermodule.miscompare_01))->(EF((votermodule.num_sensor_valid=2) & (votermodule.sensor_valid[2]=FALSE) & !(votermodule.miscompare_01))))
+--     f0:=(votermodule.sensor_valid[0]=TRUE) & (votermodule.sensor_valid[1]=TRUE) & (votermodule.sensor_valid[2]=TRUE);
+--     f1:=(votermodule.sensor_valid[0]=FALSE);
+--     f2:=(votermodule.sensor_valid[1]=FALSE);
+--     f3:=(votermodule.sensor_valid[2]=FALSE);
+    
+
+
+   -- EF(A[(votermodule.num_sensor_valid=2 & !votermodule.outputvalid) U (votermodule.num_sensor_valid=2 & votermodule.outputvalid)]) & EF(A[(votermodule.num_sensor_valid=2 & votermodule.outputvalid) U (votermodule.num_sensor_valid=2 & !votermodule.outputvalid)])
+
+   -- AG (((votermodule.num_sensor_valid = 2 & votermodule.sensor_valid[2] = FALSE) & votermodule.miscompare_01)-> EF ((votermodule.num_sensor_valid = 2 & votermodule.sensor_valid[2] = FALSE) & !votermodule.miscompare_01))

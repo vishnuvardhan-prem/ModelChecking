@@ -1,0 +1,57 @@
+-- specification AG (votermodule.outputvalid ->  (worldreading - votermodule.op_value >= 0 ? worldreading - votermodule.op_value : -(worldreading - votermodule.op_value))  <= error_threshold)  is false
+-- as demonstrated by the following execution sequence
+Trace Description: CTL Counterexample 
+Trace Type: Counterexample 
+  -> State: 2.1 <-
+    worldreading = 0
+    sensormodule1.noise = 0
+    sensormodule1.hwerrorflag = FALSE
+    sensormodule2.noise = 0
+    sensormodule2.hwerrorflag = FALSE
+    sensormodule3.noise = 0
+    sensormodule3.hwerrorflag = FALSE
+    votermodule.op_miscompare_pcount_01 = 0
+    votermodule.op_miscompare_pcount_12 = 0
+    votermodule.op_miscompare_pcount_20 = 0
+    votermodule.hw_error_pcount[0] = 0
+    votermodule.hw_error_pcount[1] = 0
+    votermodule.hw_error_pcount[2] = 0
+    votermodule.sensor_valid[0] = TRUE
+    votermodule.sensor_valid[1] = TRUE
+    votermodule.sensor_valid[2] = TRUE
+    error_threshold = 2
+    sensormodule1.sensorval = 0
+    sensormodule1.maxnoise = 4
+    sensormodule1.minsensorval = 0
+    sensormodule1.maxsensorval = 8
+    sensormodule2.sensorval = 0
+    sensormodule2.maxnoise = 4
+    sensormodule2.minsensorval = 0
+    sensormodule2.maxsensorval = 8
+    sensormodule3.sensorval = 0
+    sensormodule3.maxnoise = 4
+    sensormodule3.minsensorval = 0
+    sensormodule3.maxsensorval = 8
+    votermodule.op_value = 0
+    votermodule.outputvalid = TRUE
+    votermodule.numfaulty = 0
+    votermodule.num_sensor_valid = 3
+    votermodule.miscompare_20 = FALSE
+    votermodule.miscompare_12 = FALSE
+    votermodule.miscompare_01 = FALSE
+    votermodule.mis12 = 0
+    votermodule.mis02 = 0
+    votermodule.mis01 = 0
+    votermodule.hw_persistence_threshold = 3
+    votermodule.deviation_persistence_threshold = 4
+    votermodule.deviation_threshold = 4
+  -> State: 2.2 <-
+    worldreading = 3
+    sensormodule1.noise = 3
+    sensormodule1.hwerrorflag = TRUE
+    sensormodule2.noise = 3
+    sensormodule3.noise = 3
+    sensormodule1.sensorval = 6
+    sensormodule2.sensorval = 6
+    sensormodule3.sensorval = 6
+    votermodule.op_value = 6

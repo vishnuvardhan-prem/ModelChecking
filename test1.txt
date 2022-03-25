@@ -1,0 +1,104 @@
+-- specification AG (((votermodule.num_sensor_valid = 2 & votermodule.sensor_valid[2] = FALSE) & votermodule.miscompare_01) -> EF ((votermodule.num_sensor_valid = 2 & votermodule.sensor_valid[2] = FALSE) & !votermodule.miscompare_01))  is false
+-- as demonstrated by the following execution sequence
+Trace Description: CTL Counterexample 
+Trace Type: Counterexample 
+  -> State: 2.1 <-
+    worldreading = 0
+    sensormodule1.noise = 0
+    sensormodule1.hwerrorflag = FALSE
+    sensormodule2.noise = 0
+    sensormodule2.hwerrorflag = FALSE
+    sensormodule3.noise = 0
+    sensormodule3.hwerrorflag = FALSE
+    votermodule.op_miscompare_pcount_01 = 0
+    votermodule.op_miscompare_pcount_12 = 0
+    votermodule.op_miscompare_pcount_20 = 0
+    votermodule.hw_error_pcount[0] = 0
+    votermodule.hw_error_pcount[1] = 0
+    votermodule.hw_error_pcount[2] = 0
+    votermodule.sensor_valid[0] = TRUE
+    votermodule.sensor_valid[1] = TRUE
+    votermodule.sensor_valid[2] = TRUE
+    error_threshold = 2
+    sensormodule1.sensorval = 0
+    sensormodule1.minsensorval = 0
+    sensormodule1.maxsensorval = 4
+    sensormodule2.sensorval = 0
+    sensormodule2.minsensorval = 0
+    sensormodule2.maxsensorval = 4
+    sensormodule3.sensorval = 0
+    sensormodule3.minsensorval = 0
+    sensormodule3.maxsensorval = 4
+    votermodule.op_value = 0
+    votermodule.outputvalid = TRUE
+    votermodule.numfaulty = 0
+    votermodule.num_sensor_valid = 3
+    votermodule.miscompare_20 = FALSE
+    votermodule.miscompare_12 = FALSE
+    votermodule.miscompare_01 = FALSE
+    votermodule.mis12 = 0
+    votermodule.mis02 = 0
+    votermodule.mis01 = 0
+    votermodule.hw_persistence_threshold = 3
+    votermodule.deviation_persistence_threshold = 4
+    votermodule.deviation_threshold = 4
+  -> State: 2.2 <-
+    worldreading = 2
+    sensormodule1.noise = 2
+    sensormodule1.hwerrorflag = TRUE
+    sensormodule2.noise = 2
+    sensormodule3.noise = -2
+    sensormodule1.sensorval = 4
+    sensormodule2.sensorval = 4
+    votermodule.op_value = 3
+    votermodule.miscompare_20 = TRUE
+    votermodule.miscompare_12 = TRUE
+    votermodule.mis12 = 4
+    votermodule.mis02 = 4
+  -> State: 2.3 <-
+    sensormodule1.hwerrorflag = FALSE
+    sensormodule2.hwerrorflag = TRUE
+    votermodule.op_miscompare_pcount_12 = 1
+    votermodule.op_miscompare_pcount_20 = 1
+    votermodule.hw_error_pcount[0] = 1
+  -> State: 2.4 <-
+    sensormodule1.hwerrorflag = TRUE
+    sensormodule2.hwerrorflag = FALSE
+    votermodule.op_miscompare_pcount_12 = 2
+    votermodule.op_miscompare_pcount_20 = 2
+    votermodule.hw_error_pcount[0] = 0
+    votermodule.hw_error_pcount[1] = 1
+  -> State: 2.5 <-
+    votermodule.op_miscompare_pcount_12 = 3
+    votermodule.op_miscompare_pcount_20 = 3
+    votermodule.hw_error_pcount[0] = 1
+    votermodule.hw_error_pcount[1] = 0
+  -> State: 2.6 <-
+    sensormodule2.noise = -2
+    sensormodule3.noise = -1
+    votermodule.op_miscompare_pcount_12 = 4
+    votermodule.op_miscompare_pcount_20 = 4
+    votermodule.hw_error_pcount[0] = 2
+    sensormodule2.sensorval = 0
+    sensormodule3.sensorval = 1
+    votermodule.op_value = 1
+    votermodule.miscompare_20 = FALSE
+    votermodule.miscompare_12 = FALSE
+    votermodule.miscompare_01 = TRUE
+    votermodule.mis12 = 1
+    votermodule.mis02 = 3
+    votermodule.mis01 = 4
+  -> State: 2.7 <-
+    sensormodule3.noise = -2
+    votermodule.op_miscompare_pcount_01 = 1
+    votermodule.op_miscompare_pcount_12 = 3
+    votermodule.op_miscompare_pcount_20 = 3
+    votermodule.hw_error_pcount[0] = 3
+    votermodule.sensor_valid[2] = FALSE
+    sensormodule3.sensorval = 0
+    votermodule.op_value = 2
+    votermodule.outputvalid = FALSE
+    votermodule.numfaulty = 1
+    votermodule.num_sensor_valid = 2
+    votermodule.mis12 = 0
+    votermodule.mis02 = 4
