@@ -20,9 +20,19 @@ ASSIGN
 MODULE sensorvoter(sv0,hw0_error,sv1,hw1_error,sv2,hw2_error)
 
 DEFINE 
+
+    transient_timer:= case
+                    (sensor_valid[0]=TRUE)&(sensor_valid[1]=TRUE)&(sensor_valid[2]=TRUE):7;
+                    (sensor_valid[0]=FALSE)&(sensor_valid[1]=TRUE)&(sensor_valid[2]=TRUE):5;
+                    (sensor_valid[0]=TRUE)&(sensor_valid[1]=FALSE)&(sensor_valid[2]=TRUE):5;
+                    (sensor_valid[0]=TRUE)&(sensor_valid[1]=TRUE)&(sensor_valid[2]=FALSE):5;
+                    TRUE:3;
+                    esac;
+
     deviation_threshold:=4;
-    deviation_persistence_threshold:=4;
-    hw_persistence_threshold:=3;
+    persistence_threshold_max:=7;
+    -- deviation_persistence_threshold:=transient_timer;
+    -- hw_persistence_threshold:=transient_timer;
 
     mis01:=abs((sv0)-(sv1));
     mis02:=abs((sv0)-(sv2));
@@ -78,12 +88,12 @@ DEFINE
         esac;
 
 VAR
-    op_miscompare_pcount_01:0..deviation_persistence_threshold; --Persistence counter for pairs that cross the threshold for difference
-    op_miscompare_pcount_12:0..deviation_persistence_threshold;
-    op_miscompare_pcount_20:0..deviation_persistence_threshold;
+    op_miscompare_pcount_01:0..persistence_threshold_max; --Persistence counter for pairs that cross the threshold for difference
+    op_miscompare_pcount_12:0..persistence_threshold_max;
+    op_miscompare_pcount_20:0..persistence_threshold_max;
     --a seperate threshold for 2 sensors,keep it around 10 
 
-    hw_error_pcount: array 0..2 of 0..hw_persistence_threshold; --A count of the number of cyclces for which a sensor is failing
+    hw_error_pcount: array 0..2 of 0..persistence_threshold_max; --A count of the number of cyclces for which a sensor is failing
     
     sensor_valid: array 0..2 of boolean; --To keep track of failed sensors 
     
@@ -104,62 +114,62 @@ INIT
 ASSIGN
     next(op_miscompare_pcount_01):=case
                 (!miscompare_01)&(op_miscompare_pcount_01>0):op_miscompare_pcount_01 -1;
-                (miscompare_01)&(op_miscompare_pcount_01<deviation_persistence_threshold):op_miscompare_pcount_01 +1;
+                (miscompare_01)&(op_miscompare_pcount_01<transient_timer):op_miscompare_pcount_01 +1;
                 TRUE:op_miscompare_pcount_01;
                 esac;
 
     next(op_miscompare_pcount_12):=case
                 (!miscompare_12)&(op_miscompare_pcount_12>0):op_miscompare_pcount_12 -1;
-                (miscompare_12)&(op_miscompare_pcount_12<deviation_persistence_threshold):op_miscompare_pcount_12 +1;
+                (miscompare_12)&(op_miscompare_pcount_12<transient_timer):op_miscompare_pcount_12 +1;
                 TRUE:op_miscompare_pcount_12;
                 esac;
 
     next(op_miscompare_pcount_20):=case
                 (!miscompare_20)&(op_miscompare_pcount_20>0):op_miscompare_pcount_20 -1;
-                (miscompare_20)&(op_miscompare_pcount_20<deviation_persistence_threshold):op_miscompare_pcount_20+1; 
+                (miscompare_20)&(op_miscompare_pcount_20<transient_timer):op_miscompare_pcount_20+1; 
                 TRUE:op_miscompare_pcount_20;
                 esac;
     
     next(hw_error_pcount[0]):=case
-                (hw0_error=TRUE)&(hw_error_pcount[0]<hw_persistence_threshold):hw_error_pcount[0]+1;
-                (hw0_error=FALSE)&(hw_error_pcount[0]!=hw_persistence_threshold):0;
-                TRUE:hw_persistence_threshold;
+                (hw0_error=TRUE)&(hw_error_pcount[0]<transient_timer):hw_error_pcount[0]+1;
+                (hw0_error=FALSE)&(hw_error_pcount[0]!=transient_timer):0;
+                TRUE:transient_timer;
                 esac;
 
     next(hw_error_pcount[1]):=case
-                (hw1_error=TRUE)&(hw_error_pcount[1]<hw_persistence_threshold):hw_error_pcount[1]+1;
-                (hw1_error=FALSE)&(hw_error_pcount[1]!=hw_persistence_threshold):0;
-                TRUE:hw_persistence_threshold;
+                (hw1_error=TRUE)&(hw_error_pcount[1]<transient_timer):hw_error_pcount[1]+1;
+                (hw1_error=FALSE)&(hw_error_pcount[1]!=transient_timer):0;
+                TRUE:transient_timer;
                 esac;
     
     next(hw_error_pcount[2]):=case
-                (hw2_error=TRUE)&(hw_error_pcount[2]<hw_persistence_threshold):hw_error_pcount[2]+1;
-                (hw2_error=FALSE)&(hw_error_pcount[2]!=hw_persistence_threshold):0;
-                TRUE:hw_persistence_threshold;
+                (hw2_error=TRUE)&(hw_error_pcount[2]<transient_timer):hw_error_pcount[2]+1;
+                (hw2_error=FALSE)&(hw_error_pcount[2]!=transient_timer):0;
+                TRUE:transient_timer;
                 esac;
 
     next(sensor_valid[0]):=
                 case 
-                (op_miscompare_pcount_01=deviation_persistence_threshold)&(op_miscompare_pcount_20=deviation_persistence_threshold)&(op_miscompare_pcount_12 <deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
-                (hw_error_pcount[0]=hw_persistence_threshold):FALSE;
+                (op_miscompare_pcount_01=transient_timer)&(op_miscompare_pcount_20=transient_timer)&(op_miscompare_pcount_12 <transient_timer)&(num_sensor_valid=3):FALSE;
+                (hw_error_pcount[0]=transient_timer):FALSE;
                 TRUE:sensor_valid[0];
                 esac;
     
     next(sensor_valid[1]):=case 
-                (op_miscompare_pcount_12=deviation_persistence_threshold)&(op_miscompare_pcount_01=deviation_persistence_threshold)&(op_miscompare_pcount_20 < deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
-                (hw_error_pcount[1]=hw_persistence_threshold):FALSE;
+                (op_miscompare_pcount_12=transient_timer)&(op_miscompare_pcount_01=transient_timer)&(op_miscompare_pcount_20 < transient_timer)&(num_sensor_valid=3):FALSE;
+                (hw_error_pcount[1]=transient_timer):FALSE;
                 TRUE:sensor_valid[1];
                 esac;
     
     next(sensor_valid[2]):=case 
-                (op_miscompare_pcount_20=deviation_persistence_threshold)&(op_miscompare_pcount_12=deviation_persistence_threshold)&(op_miscompare_pcount_01 < deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
-                (hw_error_pcount[2]=hw_persistence_threshold):FALSE;
+                (op_miscompare_pcount_20=transient_timer)&(op_miscompare_pcount_12=transient_timer)&(op_miscompare_pcount_01 < transient_timer)&(num_sensor_valid=3):FALSE;
+                (hw_error_pcount[2]=transient_timer):FALSE;
                 TRUE:sensor_valid[2];
                 esac;
     
 INVAR
     !((hw0_error & hw1_error)|(hw0_error & hw2_error)|(hw2_error & hw1_error)) 
-    &!((hw_error_pcount[0]=hw_persistence_threshold &hw_error_pcount[1]=hw_persistence_threshold)|(hw_error_pcount[0]=hw_persistence_threshold &hw_error_pcount[2]=hw_persistence_threshold)|(hw_error_pcount[1]=hw_persistence_threshold &hw_error_pcount[2]=hw_persistence_threshold))
+    -- &!((hw_error_pcount[0]=hw_persistence_threshold &hw_error_pcount[1]=hw_persistence_threshold)|(hw_error_pcount[0]=hw_persistence_threshold &hw_error_pcount[2]=hw_persistence_threshold)|(hw_error_pcount[1]=hw_persistence_threshold &hw_error_pcount[2]=hw_persistence_threshold))
     -- &((hw_error_pcount[0]=hw_persistence_threshold)-> hw0_error)
     -- &((hw_error_pcount[1]=hw_persistence_threshold)-> hw1_error)
     -- &((hw_error_pcount[2]=hw_persistence_threshold)-> hw2_error)
