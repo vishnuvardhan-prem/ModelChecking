@@ -22,10 +22,10 @@ MODULE sensorvoter(sv0,hw0_error,sv1,hw1_error,sv2,hw2_error)
 DEFINE 
 
     transient_timer:= case
-                    (sensor_valid[0]=TRUE)&(sensor_valid[1]=TRUE)&(sensor_valid[2]=TRUE):7;
-                    (sensor_valid[0]=FALSE)&(sensor_valid[1]=TRUE)&(sensor_valid[2]=TRUE):5;
-                    (sensor_valid[0]=TRUE)&(sensor_valid[1]=FALSE)&(sensor_valid[2]=TRUE):5;
-                    (sensor_valid[0]=TRUE)&(sensor_valid[1]=TRUE)&(sensor_valid[2]=FALSE):5;
+                    (sensor_valid[0]=TRUE)&(sensor_valid[1]=TRUE)&(sensor_valid[2]=TRUE):3;
+                    (sensor_valid[0]=FALSE)&(sensor_valid[1]=TRUE)&(sensor_valid[2]=TRUE):3;
+                    (sensor_valid[0]=TRUE)&(sensor_valid[1]=FALSE)&(sensor_valid[2]=TRUE):3;
+                    (sensor_valid[0]=TRUE)&(sensor_valid[1]=TRUE)&(sensor_valid[2]=FALSE):3;
                     TRUE:3;
                     esac;
 
@@ -240,3 +240,10 @@ ASSIGN
 
 
 -- AG(((votermodule.num_sensor_valid=2) & (votermodule.sensor_valid[2]=FALSE) & (votermodule.miscompare_01))->(EF((votermodule.num_sensor_valid=2) & (votermodule.sensor_valid[2]=FALSE) & !(votermodule.miscompare_01))))
+
+
+
+AG((votermodule.num_sensor_valid=2 & votermodule.sensor_valid[0]=FALSE & ((votermodule.op_miscompare_pcount_12<2)|(votermodule.hw_error_pcount[1]<2)|(votermodule.hw_error_pcount[2]<7)) & votermodule.outputvalid=FALSE)->EF(votermodule.outputvalid=TRUE & votermodule.num_sensor_valid=2))
+
+
+AG((votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE)-> EF(votermodule.num_sensor_valid=2 & votermodule.outputvalid=TRUE))
