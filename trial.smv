@@ -1,9 +1,9 @@
 MODULE sensor(worldval) --The sensor module can add faults to the readings from the world module as well as pass the hardware flags of the sensor
 
 DEFINE 
-    maxsensorval:=8;
+    maxsensorval:=6;
     minsensorval:=0;
-    maxnoise:=4;
+    maxnoise:=2;
     sensorval:=case
                     (worldval+noise) < minsensorval:minsensorval;
                     (worldval+noise) > maxsensorval:maxsensorval;
@@ -24,8 +24,8 @@ DEFINE
 
     deviation_threshold:=4;
     
-    persistence_threshold_lvl1:=3;
-    persistence_threshold_lvl2:=3;
+    persistence_threshold_lvl1:=5;
+    persistence_threshold_lvl2:=4;
     persistence_threshold_lvl3:=3;
 
     minimum:=case
@@ -341,7 +341,7 @@ ASSIGN
                 (op_miscompare_pcount_13=deviation_persistence_threshold)&(op_miscompare_pcount_23=deviation_persistence_threshold)&(op_miscompare_pcount_01 < deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
                 (op_miscompare_pcount_23=deviation_persistence_threshold)&(op_miscompare_pcount_03=deviation_persistence_threshold)&(op_miscompare_pcount_01 < deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
                 (hw_error_pcount[2]=hw_persistence_threshold):FALSE;
-                TRUE:sensor_valid[2];
+                TRUE:sensor_valid[3];
                 esac;
     
 
@@ -365,7 +365,7 @@ DEFINE
     esac;
 
 VAR
-    worldreading: 0..8; --Values from the world
+    worldreading: 0..4; --Values from the world
     
     sensormodule1:sensor(worldreading);
 
