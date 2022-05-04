@@ -133,19 +133,33 @@ DEFINE
         (num_sensor_valid=4)&!(median_miscompare_0)&(median_miscompare_1)&!(median_miscompare_2)&!(median_miscompare_3):(2*sv0+sv1+2*sv2+2*sv3)/7;
         (num_sensor_valid=4)&!(median_miscompare_0)&!(median_miscompare_1)&(median_miscompare_2)&!(median_miscompare_3):(2*sv0+2*sv1+sv2+2*sv3)/7;
         (num_sensor_valid=4)&!(median_miscompare_0)&!(median_miscompare_1)&!(median_miscompare_2)&(median_miscompare_3):(2*sv0+2*sv1+2*sv2+sv3)/7;
-        
         (num_sensor_valid=4)&(median_miscompare_0)&(median_miscompare_1)&!(median_miscompare_2)&!(median_miscompare_3):(sv0+sv1+2*sv2+2*sv3)/6;
         (num_sensor_valid=4)&(median_miscompare_0)&!(median_miscompare_1)&(median_miscompare_2)&!(median_miscompare_3):(sv0+sv2+2*sv1+2*sv3)/6;
         (num_sensor_valid=4)&(median_miscompare_0)&!(median_miscompare_1)&!(median_miscompare_2)&(median_miscompare_3):(sv0+sv3+2*sv2+2*sv1)/6;
-
         (num_sensor_valid=4)&!(median_miscompare_0)&(median_miscompare_1)&(median_miscompare_2)&!(median_miscompare_3):(sv2+sv1+2*sv0+2*sv3)/6;
         (num_sensor_valid=4)&!(median_miscompare_0)&(median_miscompare_1)&!(median_miscompare_2)&(median_miscompare_3):(sv3+sv1+2*sv0+2*sv3)/6;
-
         (num_sensor_valid=4)&!(median_miscompare_0)&!(median_miscompare_1)&(median_miscompare_2)&(median_miscompare_3):(sv2+sv3+2*sv0+2*sv1)/6;
 
-        (num_sensor_valid=3)&(miscompare_01)&(miscompare_20):(sv0+2*sv1+2*sv2)/5;
-        (num_sensor_valid=3)&(miscompare_01)&(miscompare_12):(2*sv0+sv1+2*sv2)/5;
-        (num_sensor_valid=3)&(miscompare_20)&(miscompare_12):(2*sv0+2*sv1+sv2)/5;
+        (num_sensor_valid=3)&(sensor_valid[0]=FALSE)&(miscompare_12)&(miscompare_23)&!(miscompare_13):(sv2+2*sv3+2*sv2)/5;
+        (num_sensor_valid=3)&(sensor_valid[0]=FALSE)&(miscompare_12)&(miscompare_13)&!(miscompare_23):(2*sv3+sv1+2*sv2)/5;
+        (num_sensor_valid=3)&(sensor_valid[0]=FALSE)&(miscompare_13)&(miscompare_23)&!(miscompare_12):(2*sv2+2*sv1+sv3)/5;
+        (num_sensor_valid=3)&(sensor_valid[0]=FALSE):(sv3+sv1+sv2)/3;
+
+        (num_sensor_valid=3)&(sensor_valid[1]=FALSE)&(miscompare_20)&(miscompare_23)&!(miscompare_03):(sv2+2*sv0+2*sv3)/5;
+        (num_sensor_valid=3)&(sensor_valid[1]=FALSE)&(miscompare_20)&(miscompare_03)&!(miscompare_23):(2*sv3+sv0+2*sv2)/5;
+        (num_sensor_valid=3)&(sensor_valid[1]=FALSE)&(miscompare_23)&(miscompare_03)&!(miscompare_20):(2*sv0+2*sv2+sv3)/5;
+        (num_sensor_valid=3)&(sensor_valid[1]=FALSE):(sv0+sv3+sv2)/3;
+        
+        (num_sensor_valid=3)&(sensor_valid[2]=FALSE)&(miscompare_01)&(miscompare_03)&!(miscompare_13):(sv0+2*sv1+2*sv3)/5;
+        (num_sensor_valid=3)&(sensor_valid[2]=FALSE)&(miscompare_01)&(miscompare_13)&!(miscompare_03):(2*sv0+sv1+2*sv3)/5;
+        (num_sensor_valid=3)&(sensor_valid[2]=FALSE)&(miscompare_03)&(miscompare_13)&!(miscompare_01):(2*sv0+2*sv1+sv3)/5;
+        (num_sensor_valid=3)&(sensor_valid[2]=FALSE):(sv0+sv1+sv3)/3;
+
+        (num_sensor_valid=3)&(sensor_valid[3]=FALSE)&(miscompare_01)&(miscompare_20)&!(miscompare_12):(sv0+2*sv1+2*sv2)/5;
+        (num_sensor_valid=3)&(sensor_valid[3]=FALSE)&(miscompare_01)&(miscompare_12)&!(miscompare_20):(2*sv0+sv1+2*sv2)/5;
+        (num_sensor_valid=3)&(sensor_valid[3]=FALSE)&(miscompare_20)&(miscompare_12)&!(miscompare_01):(2*sv0+2*sv1+sv2)/5;
+        (num_sensor_valid=3)&(sensor_valid[3]=FALSE):(sv0+sv1+sv2)/3;
+
         (num_sensor_valid=2)&(sensor_valid[0]=FALSE):(sv1+sv2)/2;
         (num_sensor_valid=2)&(sensor_valid[1]=FALSE):(sv0+sv2)/2;
         (num_sensor_valid=2)&(sensor_valid[2]=FALSE):(sv0+sv1)/2;
@@ -163,7 +177,10 @@ VAR
     op_miscompare_pcount_13:0..persistence_threshold_max;
     op_miscompare_pcount_23:0..persistence_threshold_max;
     --a seperate threshold for 2 sensors,keep it around 10 
-
+(num_sensor_valid=3)&(sensor_valid[3]=FALSE)&(miscompare_01)&(miscompare_20)&!(miscompare_12):(sv0+2*sv1+2*sv2)/5;
+        (num_sensor_valid=3)&(sensor_valid[3]=FALSE)&(miscompare_01)&(miscompare_12)&!(miscompare_20):(2*sv0+sv1+2*sv2)/5;
+        (num_sensor_valid=3)&(sensor_valid[3]=FALSE)&(miscompare_20)&(miscompare_12)&!(miscompare_01):(2*sv0+2*sv1+sv2)/5;
+        (num_sensor_valid=3)&(sensor_valid[3]=FALSE):(sv0+sv1+sv2)/3;
     hw_error_pcount: array 0..3 of 0..persistence_threshold_max; --A count of the number of cyclces for which a sensor is failing
     
     sensor_valid: array 0..3 of boolean; --To keep track of failed sensors 
@@ -198,21 +215,25 @@ ASSIGN
 
     next(median_miscompare_pcount[0]):=case
                                         (num_sensor_valid=4)&(median_miscompare_0)&(median_miscompare_pcount[0]<deviation_persistence_threshold):median_miscompare_pcount[0]+1;
+                                        (num_sensor_valid=4)&!(median_miscompare_0)&(median_miscompare_pcount[0]>0):median_miscompare_pcount[0]-1;
                                         (num_sensor_valid=3):0;
                                         TRUE:median_miscompare_pcount[0];
                                        esac;
     next(median_miscompare_pcount[1]):=case
                                         (num_sensor_valid=4)&(median_miscompare_1)&(median_miscompare_pcount[1]<deviation_persistence_threshold):median_miscompare_pcount[1]+1;
+                                        (num_sensor_valid=4)&!(median_miscompare_1)&(median_miscompare_pcount[1]>0):median_miscompare_pcount[1]-1;
                                         (num_sensor_valid=3):0;
                                         TRUE:median_miscompare_pcount[1];
                                        esac; 
     next(median_miscompare_pcount[2]):=case
                                         (num_sensor_valid=4)&(median_miscompare_2)&(median_miscompare_pcount[2]<deviation_persistence_threshold):median_miscompare_pcount[2]+1;
+                                        (num_sensor_valid=4)&!(median_miscompare_2)&(median_miscompare_pcount[2]>0):median_miscompare_pcount[2]-1;
                                         (num_sensor_valid=3):0;
                                         TRUE:median_miscompare_pcount[2];
                                        esac;  
     next(median_miscompare_pcount[3]):=case
                                         (num_sensor_valid=4)&(median_miscompare_3)&(median_miscompare_pcount[3]<deviation_persistence_threshold):median_miscompare_pcount[3]+1;
+                                        (num_sensor_valid=4)&!(median_miscompare_3)&(median_miscompare_pcount[3]>0):median_miscompare_pcount[3]-1;
                                         (num_sensor_valid=3):0;
                                         TRUE:median_miscompare_pcount[3];
                                        esac;  
@@ -285,7 +306,7 @@ ASSIGN
 
     next(sensor_valid[0]):=
                 case
-                (median_miscompare_pcount[0]=deviation_persistence_threshold):FALSE; 
+                (median_miscompare_pcount[0]=deviation_persistence_threshold)&!((median_miscompare_pcount[1]=deviation_persistence_threshold)|(median_miscompare_pcount[2]=deviation_persistence_threshold)|(median_miscompare_pcount[3]=deviation_persistence_threshold)):FALSE; 
                 (op_miscompare_pcount_01=deviation_persistence_threshold)&(op_miscompare_pcount_20=deviation_persistence_threshold)&(op_miscompare_pcount_12 <deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
                 (op_miscompare_pcount_01=deviation_persistence_threshold)&(op_miscompare_pcount_03=deviation_persistence_threshold)&(op_miscompare_pcount_12 <deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
                 (op_miscompare_pcount_20=deviation_persistence_threshold)&(op_miscompare_pcount_03=deviation_persistence_threshold)&(op_miscompare_pcount_12 <deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
@@ -294,7 +315,7 @@ ASSIGN
                 esac;
     
     next(sensor_valid[1]):=case 
-                (median_miscompare_pcount[1]=deviation_persistence_threshold):FALSE;
+                (median_miscompare_pcount[1]=deviation_persistence_threshold)&!((median_miscompare_pcount[0]=deviation_persistence_threshold)|(median_miscompare_pcount[2]=deviation_persistence_threshold)|(median_miscompare_pcount[3]=deviation_persistence_threshold)):FALSE;
                 (op_miscompare_pcount_12=deviation_persistence_threshold)&(op_miscompare_pcount_01=deviation_persistence_threshold)&(op_miscompare_pcount_20 < deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
                 (op_miscompare_pcount_12=deviation_persistence_threshold)&(op_miscompare_pcount_13=deviation_persistence_threshold)&(op_miscompare_pcount_20 < deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
                 (op_miscompare_pcount_01=deviation_persistence_threshold)&(op_miscompare_pcount_13=deviation_persistence_threshold)&(op_miscompare_pcount_20 < deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
@@ -303,7 +324,7 @@ ASSIGN
                 esac;
     
     next(sensor_valid[2]):=case 
-                (median_miscompare_pcount[2]=deviation_persistence_threshold):FALSE;
+                (median_miscompare_pcount[2]=deviation_persistence_threshold)&!((median_miscompare_pcount[1]=deviation_persistence_threshold)|(median_miscompare_pcount[0]=deviation_persistence_threshold)|(median_miscompare_pcount[3]=deviation_persistence_threshold)):FALSE;
                 (op_miscompare_pcount_20=deviation_persistence_threshold)&(op_miscompare_pcount_12=deviation_persistence_threshold)&(op_miscompare_pcount_01 < deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
                 (op_miscompare_pcount_20=deviation_persistence_threshold)&(op_miscompare_pcount_23=deviation_persistence_threshold)&(op_miscompare_pcount_01 < deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
                 (op_miscompare_pcount_23=deviation_persistence_threshold)&(op_miscompare_pcount_12=deviation_persistence_threshold)&(op_miscompare_pcount_01 < deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
@@ -312,7 +333,7 @@ ASSIGN
                 esac;
     
     next(sensor_valid[3]):=case 
-                (median_miscompare_pcount[3]=deviation_persistence_threshold):FALSE;
+                (median_miscompare_pcount[3]=deviation_persistence_threshold)&!((median_miscompare_pcount[1]=deviation_persistence_threshold)|(median_miscompare_pcount[2]=deviation_persistence_threshold)|(median_miscompare_pcount[0]=deviation_persistence_threshold)):FALSE;
                 (op_miscompare_pcount_13=deviation_persistence_threshold)&(op_miscompare_pcount_03=deviation_persistence_threshold)&(op_miscompare_pcount_01 < deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
                 (op_miscompare_pcount_13=deviation_persistence_threshold)&(op_miscompare_pcount_23=deviation_persistence_threshold)&(op_miscompare_pcount_01 < deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
                 (op_miscompare_pcount_23=deviation_persistence_threshold)&(op_miscompare_pcount_03=deviation_persistence_threshold)&(op_miscompare_pcount_01 < deviation_persistence_threshold)&(num_sensor_valid=3):FALSE;
