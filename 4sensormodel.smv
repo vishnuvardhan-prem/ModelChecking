@@ -1,7 +1,7 @@
 MODULE sensor(worldval) --The sensor module can add faults to the readings from the world module as well as pass the hardware flags of the sensor
 
 DEFINE 
-    maxsensorval:=6;
+    maxsensorval:=10;
     minsensorval:=0;
     maxnoise:=2;
     sensorval:=case
@@ -49,13 +49,6 @@ DEFINE
                                 (num_sensor_valid=2):hw_persistence_threshold_2s;
                                 TRUE:hw_persistence_threshold_1s;
                             esac;
-
-    -- mis01:=abs((sv0)-(sv1));
-    -- mis02:=abs((sv0)-(sv2));
-    -- mis12:=abs((sv2)-(sv1));
-    -- mis03:=abs((sv0)-(sv3));
-    -- mis13:=abs((sv1)-(sv3));
-    -- mis23:=abs((sv2)-(sv3));
 
     --median_miscompare_n is only applicable when there are 4 valid sensors
     median_miscompare_0:=(abs(sv_median - sv0)>deviation_threshold); 
@@ -145,54 +138,6 @@ DEFINE
               esac;
 
     op_value:= (factor_0 * sv0 + factor_1 * sv1 + factor_2 * sv2 + factor_3 * sv3)/(factor_0 + factor_1 + factor_2 + factor_3);
-
-    -- op_value:= case
-    --     --add factors in define and one line
-    --     (num_sensor_valid=4)&(median_miscompare_0)&!(median_miscompare_1)&!(median_miscompare_2)&!(median_miscompare_3):(sv0+2*sv1+2*sv2+2*sv3)/7;
-    --     (num_sensor_valid=4)&!(median_miscompare_0)&(median_miscompare_1)&!(median_miscompare_2)&!(median_miscompare_3):(2*sv0+sv1+2*sv2+2*sv3)/7;
-    --     (num_sensor_valid=4)&!(median_miscompare_0)&!(median_miscompare_1)&(median_miscompare_2)&!(median_miscompare_3):(2*sv0+2*sv1+sv2+2*sv3)/7;
-    --     (num_sensor_valid=4)&!(median_miscompare_0)&!(median_miscompare_1)&!(median_miscompare_2)&(median_miscompare_3):(2*sv0+2*sv1+2*sv2+sv3)/7;
-    --     (num_sensor_valid=4)&(median_miscompare_0)&(median_miscompare_1)&!(median_miscompare_2)&!(median_miscompare_3):(sv0+sv1+2*sv2+2*sv3)/6;
-    --     (num_sensor_valid=4)&(median_miscompare_0)&!(median_miscompare_1)&(median_miscompare_2)&!(median_miscompare_3):(sv0+sv2+2*sv1+2*sv3)/6;
-    --     (num_sensor_valid=4)&(median_miscompare_0)&!(median_miscompare_1)&!(median_miscompare_2)&(median_miscompare_3):(sv0+sv3+2*sv2+2*sv1)/6;
-    --     (num_sensor_valid=4)&!(median_miscompare_0)&(median_miscompare_1)&(median_miscompare_2)&!(median_miscompare_3):(sv2+sv1+2*sv0+2*sv3)/6;
-    --     (num_sensor_valid=4)&!(median_miscompare_0)&(median_miscompare_1)&!(median_miscompare_2)&(median_miscompare_3):(sv3+sv1+2*sv0+2*sv3)/6;
-    --     (num_sensor_valid=4)&!(median_miscompare_0)&!(median_miscompare_1)&(median_miscompare_2)&(median_miscompare_3):(sv2+sv3+2*sv0+2*sv1)/6;
-
-    --     (num_sensor_valid=3)&(sensor_valid[0]=0)&(miscompare_12)&(miscompare_23)&!(miscompare_13):(sv2+2*sv3+2*sv2)/5;
-    --     (num_sensor_valid=3)&(sensor_valid[0]=0)&(miscompare_12)&(miscompare_13)&!(miscompare_23):(2*sv3+sv1+2*sv2)/5;
-    --     (num_sensor_valid=3)&(sensor_valid[0]=0)&(miscompare_13)&(miscompare_23)&!(miscompare_12):(2*sv2+2*sv1+sv3)/5;
-    --     (num_sensor_valid=3)&(sensor_valid[0]=0):(sv3+sv1+sv2)/3;
-
-    --     (num_sensor_valid=3)&(sensor_valid[1]=0)&(miscompare_20)&(miscompare_23)&!(miscompare_03):(sv2+2*sv0+2*sv3)/5;
-    --     (num_sensor_valid=3)&(sensor_valid[1]=0)&(miscompare_20)&(miscompare_03)&!(miscompare_23):(2*sv3+sv0+2*sv2)/5;
-    --     (num_sensor_valid=3)&(sensor_valid[1]=0)&(miscompare_23)&(miscompare_03)&!(miscompare_20):(2*sv0+2*sv2+sv3)/5;
-    --     (num_sensor_valid=3)&(sensor_valid[1]=0):(sv0+sv3+sv2)/3;
-        
-    --     (num_sensor_valid=3)&(sensor_valid[2]=0)&(miscompare_01)&(miscompare_03)&!(miscompare_13):(sv0+2*sv1+2*sv3)/5;
-    --     (num_sensor_valid=3)&(sensor_valid[2]=0)&(miscompare_01)&(miscompare_13)&!(miscompare_03):(2*sv0+sv1+2*sv3)/5;
-    --     (num_sensor_valid=3)&(sensor_valid[2]=0)&(miscompare_03)&(miscompare_13)&!(miscompare_01):(2*sv0+2*sv1+sv3)/5;
-    --     (num_sensor_valid=3)&(sensor_valid[2]=0):(sv0+sv1+sv3)/3;
-
-    --     (num_sensor_valid=3)&(sensor_valid[3]=0)&(miscompare_01)&(miscompare_20)&!(miscompare_12):(sv0+2*sv1+2*sv2)/5;
-    --     (num_sensor_valid=3)&(sensor_valid[3]=0)&(miscompare_01)&(miscompare_12)&!(miscompare_20):(2*sv0+sv1+2*sv2)/5;
-    --     (num_sensor_valid=3)&(sensor_valid[3]=0)&(miscompare_20)&(miscompare_12)&!(miscompare_01):(2*sv0+2*sv1+sv2)/5;
-    --     (num_sensor_valid=3)&(sensor_valid[3]=0):(sv0+sv1+sv2)/3;
-
-    --     (num_sensor_valid=2)&(sensor_valid[0]=0)&(sensor_valid[1]=0):(sv3+sv2)/2;
-    --     (num_sensor_valid=2)&(sensor_valid[0]=0)&(sensor_valid[2]=0):(sv1+sv3)/2;
-    --     (num_sensor_valid=2)&(sensor_valid[0]=0)&(sensor_valid[3]=0):(sv1+sv2)/2;
-    --     (num_sensor_valid=2)&(sensor_valid[1]=0)&(sensor_valid[2]=0):(sv0+sv3)/2;
-    --     (num_sensor_valid=2)&(sensor_valid[1]=0)&(sensor_valid[3]=0):(sv0+sv2)/2;
-    --     (num_sensor_valid=2)&(sensor_valid[2]=0)&(sensor_valid[3]=0):(sv0+sv1)/2;
-
-    --     (num_sensor_valid=1)&(sensor_valid[0]=1):sv0;
-    --     (num_sensor_valid=1)&(sensor_valid[1]=1):sv1;
-    --     (num_sensor_valid=1)&(sensor_valid[2]=1):sv2;
-    --     (num_sensor_valid=1)&(sensor_valid[2]=1):sv3;
-
-    --     TRUE:(sv0+sv1+sv2+sv3)/4; 
-    --     esac;
 
 VAR
     op_miscompare_pcount_01:0..persistence_threshold_max; --Persistence counter for pairs that cross the threshold for difference
@@ -365,12 +310,7 @@ ASSIGN
     
 
 INVAR
-    !((hw0_error & hw1_error)|(hw0_error & hw2_error)|(hw2_error & hw1_error)) 
-    -- &!((hw_error_pcount[0]=hw_persistence_threshold &hw_error_pcount[1]=hw_persistence_threshold)|(hw_error_pcount[0]=hw_persistence_threshold &hw_error_pcount[2]=hw_persistence_threshold)|(hw_error_pcount[1]=hw_persistence_threshold &hw_error_pcount[2]=hw_persistence_threshold))
-    -- &((hw_error_pcount[0]=hw_persistence_threshold)-> hw0_error)
-    -- &((hw_error_pcount[1]=hw_persistence_threshold)-> hw1_error)
-    -- &((hw_error_pcount[2]=hw_persistence_threshold)-> hw2_error)
-
+    !((hw0_error & hw1_error)|(hw0_error & hw2_error)|(hw0_error & hw3_error)| (hw2_error & hw1_error)| (hw1_error & hw3_error) | (hw2_error & hw3_error))
 
 MODULE main
 
@@ -384,7 +324,7 @@ DEFINE
     esac;
 
 VAR
-    worldreading: 0..4; --Values from the world
+    worldreading: 0..10; --Values from the world
     
     sensormodule1:sensor(worldreading);
 
@@ -441,10 +381,18 @@ ASSIGN
 
 -- AG(((votermodule.num_sensor_valid=2) & (votermodule.sensor_valid[2]=0) & (votermodule.miscompare_01))->(EF((votermodule.num_sensor_valid=2) & (votermodule.sensor_valid[2]=0) & !(votermodule.miscompare_01))))
 
-
-
 -- AG((votermodule.num_sensor_valid=2 & votermodule.sensor_valid[0]=0 &((votermodule.hw_error_pcount[1]<3)|(votermodule.hw_error_pcount[2]<3)) & votermodule.outputvalid=FALSE & AF(votermodule.hw_error_pcount[1]!=3 & votermodule.hw_error_pcount[2]!=3))->EF(votermodule.outputvalid=TRUE & votermodule.num_sensor_valid=2 & votermodule.sensor_valid[0]=0))
 
-
 -- AG((votermodule.num_sensor_valid=2 & votermodule.outputvalid=FALSE)-> EF(votermodule.num_sensor_valid=2 & votermodule.outputvalid=TRUE))
+
+--AG((votermodule.num_sensor_valid=4 & votermodule.outputvalid=FALSE)-> EF(votermodule.num_sensor_valid=4 & votermodule.outputvalid= TRUE))
+
+--AG((votermodule.num_sensor_valid=3)->A[(votermodule.num_sensor_valid=3)U(votermodule.num_sensor_valid=2)])
+
+--AG((votermodule.num_sensor_valid=4 & votermodule.median_miscompare_0 & votermodule.median_miscompare_1 & votermodule.median_miscompare_2 & votermodule.median_miscompare_3 & votermodule.outputvalid=TRUE)->AX(votermodule.num_sensor_valid=4 & votermodule.outputvalid=FALSE))
+
+--check_ltlspec -p "G((votermodule.num_sensor_valid=4 & votermodule.median_miscompare_0 & votermodule.median_miscompare_1 & votermodule.median_miscompare_2 & votermodule.median_miscompare_3 & votermodule.outputvalid=TRUE)->X (votermodule.num_sensor_valid=4 & votermodule.outputvalid=FALSE))"
+
+--check_ctlspec -p "EF((votermodule.num_sensor_valid=4 & votermodule.median_miscompare_0 & votermodule.median_miscompare_1 & votermodule.median_miscompare_2 & votermodule.median_miscompare_3 & votermodule.outputvalid=FALSE))"
+
 
